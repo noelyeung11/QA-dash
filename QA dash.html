@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PayFlow CS-QA Platform Prototype</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex">
+
+  <!-- ========================================== -->
+  <!-- LEFT SIDEBAR NAVIGATION                    -->
+  <!-- ========================================== -->
+  <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between shrink-0 shadow-xl border-r border-slate-800">
+    <div>
+      <div class="h-16 flex items-center space-x-3 px-6 bg-slate-950 border-b border-slate-800">
+        <div class="bg-indigo-600 p-2 rounded-lg text-white">
+          <i class="fa-solid fa-shield-halved text-lg"></i>
+        </div>
+        <div>
+          <span class="font-bold text-white text-base tracking-wide block leading-tight">PayFlow QA</span>
+          <span class="text-[10px] text-slate-400 block font-medium">PSP CS Management</span>
+        </div>
+      </div>
+
+      <nav class="p-4 space-y-1 text-xs font-medium">
+        <div class="text-[10px] font-bold text-slate-500 uppercase px-3 py-2 tracking-wider">Main Navigation</div>
+
+        <button onclick="switchTab('team-hub')" id="sb-team-hub" class="sb-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg bg-indigo-600 text-white font-semibold transition">
+          <i class="fa-solid fa-users w-4 text-center"></i>
+          <span>Team Hub</span>
+        </button>
+
+        <button onclick="switchTab('announcements')" id="sb-announcements" class="sb-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+          <i class="fa-solid fa-note-sticky w-4 text-center"></i>
+          <span>Announcements</span>
+        </button>
+
+        <button onclick="switchTab('agent-portal')" id="sb-agent-portal" class="sb-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+          <i class="fa-solid fa-user-gear w-4 text-center"></i>
+          <span>CS Agent Portal</span>
+        </button>
+
+        <button onclick="switchTab('qa-evaluation')" id="sb-qa-evaluation" class="sb-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+          <i class="fa-solid fa-clipboard-check w-4 text-center"></i>
+          <span>QA Evaluation</span>
+        </button>
+
+        <button onclick="switchTab('sop-engine')" id="sb-sop-engine" class="sb-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+          <i class="fa-solid fa-diagram-project w-4 text-center"></i>
+          <span>SOP Engine</span>
+          <span class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded ml-auto">Restricted</span>
+        </button>
+
+        <div class="pt-4 text-[10px] font-bold text-slate-500 uppercase px-3 py-2 tracking-wider">System Maintain</div>
+        <button onclick="switchTab('it-logs')" id="sb-it-logs" class="sb-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+          <div class="flex items-center space-x-3">
+            <i class="fa-solid fa-server w-4 text-center"></i>
+            <span>IT Sync Logs</span>
+          </div>
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+        </button>
+      </nav>
+    </div>
+
+    <div class="p-4 bg-slate-950 border-t border-slate-800 space-y-3">
+      <div>
+        <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Simulate Logged-in User Role:</label>
+        <select id="role-select" onchange="switchUserRole(this.value)" class="w-full bg-slate-900 border border-slate-700 text-slate-300 text-xs rounded px-2 py-1.5 focus:ring-1 focus:ring-indigo-500">
+          <option value="TL" selected>Team Leader (Sarah)</option>
+          <option value="AGENT">CS Agent (Emily)</option>
+          <option value="QA">QA Evaluator (Alex)</option>
+          <option value="MANAGER">Manager (David)</option>
+        </select>
+        <p class="text-[10px] text-slate-500 mt-1.5 leading-snug">Demo only — in production, role comes from the authenticated account, not a picker.</p>
+      </div>
+
+      <div class="flex items-center justify-between pt-2 border-t border-slate-800">
+        <div class="flex items-center space-x-2.5">
+          <div id="user-avatar" class="w-8 h-8 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-xs">SL</div>
+          <div>
+            <div id="user-name" class="text-xs font-semibold text-white leading-tight">Sarah Leader</div>
+            <div id="user-role-badge" class="text-[10px] text-amber-400 font-medium">Team Leader</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================== -->
+  <!-- MAIN CONTENT AREA                          -->
+  <!-- ========================================== -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+    <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 shadow-sm">
+      <h1 id="page-title" class="text-lg font-bold text-slate-900">Team Hub & Operations Center</h1>
+      <span class="text-[11px] text-slate-400">Data is shared &amp; saved — this is a working basic version, not a click-through mockup</span>
+    </header>
+
+    <div class="bg-amber-50 border-b border-amber-200 px-6 py-2 flex items-center justify-between text-xs text-amber-900">
+      <div class="flex items-center space-x-2">
+        <span class="px-2 py-0.5 rounded bg-amber-200 text-amber-900 font-bold text-[10px]">Data Out-of-Date Warning</span>
+        <span>Telegram Log sync delayed by 18 mins. Last sync: Today 10:34 AM CST. (static demo)</span>
+      </div>
+      <button onclick="switchTab('it-logs')" class="underline font-semibold hover:text-amber-950">Check IT Logs →</button>
+    </div>
+
+    <main class="flex-1 overflow-y-auto p-6 space-y-6">
+
+      <!-- TAB 1: TEAM HUB -->
+      <section id="sec-team-hub" class="space-y-6">
+
+        <div class="flex items-center justify-between">
+          <h2 class="font-bold text-slate-900 text-sm">Mandatory Announcements</h2>
+          <button id="btn-new-announcement" onclick="openModal('announcement-modal')" class="hidden bg-indigo-600 text-white text-xs font-medium px-3 py-1.5 rounded-lg">
+            <i class="fa-solid fa-plus mr-1"></i>New Announcement
+          </button>
+        </div>
+        <div id="announcements-list" class="space-y-4"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div id="qaweek-banner" class="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-xl p-6 shadow-md flex flex-col justify-between"></div>
+
+          <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-slate-900 text-base">Team Performance Leaderboard</h3>
+              <div class="flex items-center gap-2">
+                <button id="btn-new-highlight" onclick="openModal('qaweek-modal')" class="hidden bg-slate-800 text-white text-xs font-medium px-3 py-1.5 rounded-lg">
+                  <i class="fa-solid fa-award mr-1"></i>New Highlight
+                </button>
+                <button id="btn-new-score" onclick="openModal('score-modal')" class="hidden bg-indigo-600 text-white text-xs font-medium px-3 py-1.5 rounded-lg">
+                  <i class="fa-solid fa-plus mr-1"></i>Record Score
+                </button>
+              </div>
+            </div>
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="border-b border-slate-200 text-slate-500 uppercase bg-slate-50">
+                  <th class="py-2.5 px-3">Rank</th>
+                  <th class="py-2.5 px-3">CS Agent</th>
+                  <th class="py-2.5 px-3">Team</th>
+                  <th class="py-2.5 px-3">Avg Score</th>
+                  <th class="py-2.5 px-3"># Reviews</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-body" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: ANNOUNCEMENTS ARCHIVE (memo-style, searchable, sortable) -->
+      <section id="sec-announcements" class="space-y-6 hidden">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <div class="flex items-center justify-between mb-1">
+            <h2 class="font-bold text-slate-900 text-base">Announcements Archive</h2>
+            <span class="text-[11px] text-slate-400">Read-only for CS Agents — TL / QA / Manager can post</span>
+          </div>
+          <p class="text-xs text-slate-500 mb-4">Every announcement, memo-style. Search by keyword, and sort by importance (default) or by how often each one's been opened.</p>
+          <div class="flex flex-wrap items-center gap-3 mb-4">
+            <input id="ann-search" oninput="renderAnnouncementsArchive()" placeholder="Search title or body…" class="flex-1 min-w-[220px] border border-slate-300 rounded px-3 py-1.5 text-xs">
+            <select id="ann-sort" onchange="renderAnnouncementsArchive()" class="border border-slate-300 rounded px-2 py-1.5 text-xs">
+              <option value="importance">Sort: By importance (default)</option>
+              <option value="clicks">Sort: Most clicked</option>
+            </select>
+          </div>
+          <div id="announcements-archive-list" class="divide-y divide-slate-100"></div>
+        </div>
+      </section>
+
+      <!-- TAB 2: AGENT PORTAL -->
+      <section id="sec-agent-portal" class="space-y-6 hidden">
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 space-y-6">
+          <div class="flex items-center justify-between border-b pb-4">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Emily Chen (CS Agent)</h2>
+              <p class="text-xs text-slate-500">Assigned Team Leader: Sarah Leader</p>
+            </div>
+            <span class="text-2xl font-black text-amber-600">84.5 <span class="text-xs text-slate-400">/ 100</span></span>
+          </div>
+
+          <div>
+            <h3 class="text-xs font-bold text-slate-500 uppercase mb-2">Opportunities</h3>
+            <div id="opportunities-list" class="space-y-3"></div>
+          </div>
+
+          <div class="pt-2" id="dispute-btn-wrap">
+            <button onclick="openModal('dispute-modal')" class="bg-slate-900 hover:bg-slate-800 text-white font-medium py-1.5 px-3 rounded text-xs transition">
+              <i class="fa-solid fa-gavel mr-1"></i> Raise Team Dispute (TL Only)
+            </button>
+          </div>
+
+          <div id="dispute-status-list" class="space-y-2"></div>
+        </div>
+      </section>
+
+      <!-- TAB 3: QA EVALUATION (Dual Timeline + Scorecard) -->
+      <section id="sec-qa-evaluation" class="space-y-6 hidden">
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="font-bold text-slate-900 text-base"><i class="fa-solid fa-shuffle text-indigo-600 mr-2"></i>Sample Tickets for Audit</h3>
+            <span class="text-[11px] text-slate-400">Placeholder ticket pool — swap for the real backend later</span>
+          </div>
+          <p class="text-xs text-slate-500 mb-3">Audit is per agent: pick who, adjust the time range and how many tickets to pull, then draw a random sample from their tickets in that window.</p>
+          <div class="flex flex-wrap items-end gap-3 mb-4">
+            <div>
+              <label class="text-[11px] font-bold text-slate-500 uppercase block mb-1">Agent</label>
+              <select id="sample-agent" class="border border-slate-300 rounded px-2 py-1.5 text-xs"></select>
+            </div>
+            <div>
+              <label class="text-[11px] font-bold text-slate-500 uppercase block mb-1">From</label>
+              <input type="date" id="sample-start" class="border border-slate-300 rounded px-2 py-1.5 text-xs">
+            </div>
+            <div>
+              <label class="text-[11px] font-bold text-slate-500 uppercase block mb-1">To</label>
+              <input type="date" id="sample-end" class="border border-slate-300 rounded px-2 py-1.5 text-xs">
+            </div>
+            <div>
+              <label class="text-[11px] font-bold text-slate-500 uppercase block mb-1"># to pull</label>
+              <input type="number" id="sample-count" min="1" max="10" value="3" class="border border-slate-300 rounded px-2 py-1.5 text-xs w-16">
+            </div>
+            <button onclick="randomSampleTickets()" class="bg-indigo-600 text-white text-xs font-medium px-4 py-2 rounded-lg"><i class="fa-solid fa-dice mr-1"></i>Random Sample</button>
+          </div>
+          <div id="sample-results" class="space-y-2"></div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <div class="flex items-center justify-between mb-1">
+            <h3 id="scorecard-title" class="font-bold text-slate-900 text-base">QA Scorecard — Emily Chen, Ticket #48120</h3>
+            <span class="text-[11px] text-slate-400">Equal weight (25% each) · system scores are suggestions only</span>
+          </div>
+          <p class="text-xs text-slate-500 mb-4">Each aspect is a single Yes / No / N-A call — Yes and N/A both count as full marks, only No costs points. The system pre-selects a suggested answer using placeholder rules; QA can change any of them freely — nothing is locked or tracked.</p>
+
+          <div id="scorecard-dims" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5"></div>
+
+          <div class="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 mb-4">
+            <span class="text-xs font-bold text-slate-700 uppercase">Overall (avg of 4)</span>
+            <span id="scorecard-overall" class="text-2xl font-black text-indigo-600">—</span>
+          </div>
+
+          <button id="btn-submit-eval" onclick="submitEvaluation()" class="hidden bg-indigo-600 text-white text-xs font-medium px-4 py-2 rounded-lg">
+            <i class="fa-solid fa-check mr-1"></i>Submit Evaluation
+          </button>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <h3 class="font-bold text-slate-900 text-sm mb-3">Recent Evaluations</h3>
+
+          <div id="evaluations-list" class="space-y-2"></div>
+        </div>
+
+        <details class="bg-slate-50 border border-dashed border-slate-300 rounded-xl p-6">
+          <summary class="text-xs font-bold text-slate-500 uppercase cursor-pointer">Manual log testing tools (temporary — remove once live TG/backend API is connected)</summary>
+          <p class="text-xs text-slate-500 mt-3 mb-4">
+            Once tickets pull real Telegram + backend data automatically, QA should never need to paste anything —
+            selecting a ticket above would fetch its conversation directly. These tools exist only because that
+            live connection isn't wired up yet in this prototype.
+          </p>
+
+          <div class="bg-white rounded-xl border border-slate-200 p-5 mb-4">
+            <h4 class="font-bold text-slate-800 text-sm mb-1"><i class="fa-brands fa-telegram text-sky-500 mr-2"></i>Paste a Telegram log export to test the SLA matcher</h4>
+            <p class="text-xs text-slate-500 mb-3">Paste rows in the agreed format (Date+Time, Group ID, Group Name, Sender ID, Sender Name, Message ID, Content, Reply-to). The first line can be a header — it's skipped automatically.</p>
+            <textarea id="tg-log-input" rows="6" placeholder="Date,群組或頻道ID,群組或頻道名稱,發訊者ID,發訊者名稱,訊息ID,訊息內容,文件標題或回應訊息ID&#10;2026-09-07 14:03:45,-100123,K9win x HTPAY INR,5471491194,CS15CBV,90897,fund not received yet,&#10;..." class="w-full border border-slate-300 rounded-lg p-3 text-xs font-mono mb-3"></textarea>
+            <div class="flex items-center gap-3 mb-4">
+              <button onclick="parseTgLog()" class="bg-indigo-600 text-white text-xs font-medium px-4 py-2 rounded-lg"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Match Replies &amp; Check SLA</button>
+              <span id="tg-log-status" class="text-xs text-slate-400"></span>
+            </div>
+            <div id="tg-log-results" class="space-y-2"></div>
+          </div>
+
+          <div class="bg-white rounded-xl border border-slate-200 p-5">
+            <h4 class="font-bold text-slate-800 text-sm mb-3">Illustrative example of what a fetched ticket would look like</h4>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div class="space-y-3">
+                <h5 class="font-bold text-slate-700 text-xs"><i class="fa-brands fa-telegram text-sky-500 mr-2"></i>Telegram Customer Dialogue</h5>
+                <div class="p-3 bg-sky-50 rounded border border-sky-200 text-xs">
+                  <span class="font-bold text-sky-900">Emily Chen (14:03:45)</span>
+                  <p class="text-sky-900">Checking internal log now, please wait 2 minutes.</p>
+                </div>
+              </div>
+              <div class="space-y-3">
+                <h5 class="font-bold text-slate-700 text-xs"><i class="fa-solid fa-server text-indigo-600 mr-2"></i>Internal Backend Logs</h5>
+                <div class="p-3 bg-amber-50 rounded border border-amber-200 text-xs">
+                  <span class="font-bold text-amber-900">MANUAL_PROOF_UPLOAD (14:13:55)</span>
+                  <p class="text-red-600 font-bold">Exceeded 5-min SLA limit!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+
+      <!-- TAB 4: SOP ENGINE (Restricted Page) — static placeholder -->
+      <section id="sec-sop-engine" class="space-y-6 hidden">
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 space-y-4">
+          <div class="flex items-center justify-between border-b pb-3">
+            <div>
+              <h2 class="font-bold text-slate-900 text-base">Global SOP Engine (Restricted Access)</h2>
+              <p class="text-xs text-slate-500">Only TL, QA, and Manager can view this page — flowchart editor comes in a later step.</p>
+            </div>
+            <button class="bg-indigo-600 text-white text-xs px-3 py-1.5 rounded font-medium opacity-60 cursor-not-allowed" title="Not built yet">Edit Flowcharts (SOP_EDIT)</button>
+          </div>
+          <div class="bg-slate-950 p-6 rounded-xl text-white text-center">
+            <p class="text-xs text-slate-400">[ Mermaid.js / React Flow canvas — placeholder ]</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: IT LOGS — static placeholder -->
+      <section id="sec-it-logs" class="space-y-6 hidden">
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+          <h2 class="font-bold text-slate-900 text-base mb-2">IT Data Health &amp; Sync Logs</h2>
+          <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded font-bold">Telegram Sync Out-of-Date (18m delay) — static demo</span>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- SOP READ-ONLY MODAL -->
+  <div id="sop-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 space-y-4">
+      <div class="flex items-center justify-between border-b pb-3">
+        <h3 id="sop-modal-title" class="font-bold text-slate-900 text-sm"><i class="fa-solid fa-diagram-project text-indigo-600 mr-2"></i>SOP Read-Only Pop-up</h3>
+        <button onclick="closeModal('sop-modal')" class="text-slate-400 hover:text-slate-600">×</button>
+      </div>
+      <div class="p-4 bg-slate-900 text-white rounded-lg text-xs space-y-2">
+        <ol id="sop-modal-steps" class="list-decimal list-inside space-y-1.5 text-amber-100"></ol>
+      </div>
+      <p id="sop-modal-source" class="text-[11px] text-slate-400 italic"></p>
+      <p class="text-slate-400 italic text-[11px]">You are viewing a single contextual SOP pop-up — it does not link to any other workflow.</p>
+    </div>
+  </div>
+
+  <!-- DISPUTE MODAL (TL ONLY) -->
+  <div id="dispute-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
+      <div class="flex items-center justify-between border-b pb-3">
+        <h3 class="font-bold text-slate-900 text-sm"><i class="fa-solid fa-gavel text-indigo-600 mr-2"></i>Raise Team Dispute (TL Only)</h3>
+        <button onclick="closeModal('dispute-modal')" class="text-slate-400 hover:text-slate-600">×</button>
+      </div>
+      <textarea id="dispute-reason" rows="3" placeholder="Explain why this deduction impacts team performance inappropriately..." class="w-full border rounded p-2 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500"></textarea>
+      <div class="flex justify-end space-x-2 pt-2">
+        <button onclick="closeModal('dispute-modal')" class="px-3 py-1.5 bg-slate-100 text-xs font-medium rounded">Cancel</button>
+        <button onclick="submitDispute()" class="px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded">Submit to QA</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW ANNOUNCEMENT MODAL -->
+  <div id="announcement-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 space-y-3">
+      <div class="flex items-center justify-between border-b pb-3">
+        <h3 class="font-bold text-slate-900 text-sm">New Mandatory Announcement</h3>
+        <button onclick="closeModal('announcement-modal')" class="text-slate-400 hover:text-slate-600">×</button>
+      </div>
+      <input id="ann-title" placeholder="Title (English)" class="w-full border rounded p-2 text-xs">
+      <select id="ann-importance" class="w-full border rounded p-2 text-xs">
+        <option value="high">High priority</option>
+        <option value="normal" selected>Normal</option>
+        <option value="low">Low priority</option>
+      </select>
+      <textarea id="ann-body" rows="4" placeholder="Body — what changed, why, what agents must do" class="w-full border rounded p-2 text-xs"></textarea>
+      <div class="flex justify-end pt-2">
+        <button onclick="submitAnnouncement()" class="px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded">Publish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW QA-OF-WEEK MODAL -->
+  <div id="qaweek-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 space-y-3">
+      <div class="flex items-center justify-between border-b pb-3">
+        <h3 class="font-bold text-slate-900 text-sm">New QA of the Week Highlight</h3>
+        <button onclick="closeModal('qaweek-modal')" class="text-slate-400 hover:text-slate-600">×</button>
+      </div>
+      <select id="qw-scope" class="w-full border rounded p-2 text-xs">
+        <option value="team">Team Highlight</option>
+        <option value="case">Case Highlight</option>
+      </select>
+      <input id="qw-subject" placeholder="Team name or case/ticket ref" class="w-full border rounded p-2 text-xs">
+      <input id="qw-title" placeholder="Headline" class="w-full border rounded p-2 text-xs">
+      <textarea id="qw-summary" rows="3" placeholder="Key takeaway (write manually for now — AI drafting comes later)" class="w-full border rounded p-2 text-xs"></textarea>
+      <div class="flex justify-end pt-2">
+        <button onclick="submitQaWeek()" class="px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded">Publish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW SCORE MODAL -->
+  <div id="score-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 space-y-3">
+      <div class="flex items-center justify-between border-b pb-3">
+        <h3 class="font-bold text-slate-900 text-sm">Record QA Score</h3>
+        <button onclick="closeModal('score-modal')" class="text-slate-400 hover:text-slate-600">×</button>
+      </div>
+      <input id="sc-agent" placeholder="Agent name" class="w-full border rounded p-2 text-xs">
+      <input id="sc-team" placeholder="Team" value="Team Alpha" class="w-full border rounded p-2 text-xs">
+      <input id="sc-score" type="number" min="0" max="100" value="90" class="w-full border rounded p-2 text-xs">
+      <div class="flex justify-end pt-2">
+        <button onclick="submitScore()" class="px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Demo identities (role picker stands in for real login) ----------
+    const DEMO_USERS = {
+      TL: { name: 'Sarah Leader', avatar: 'SL', badge: 'Team Leader' },
+      AGENT: { name: 'Emily Chen', avatar: 'EC', badge: 'CS Agent' },
+      QA: { name: 'Alex QA', avatar: 'AQ', badge: 'QA Evaluator' },
+      MANAGER: { name: 'David Manager', avatar: 'DM', badge: 'Operations Lead' },
+    };
+    const KNOWN_TEAM_NAMES = ['Sarah Leader', 'Emily Chen', 'Alex QA', 'David Manager'];
+
+    // ---------- Opportunities (sample content adapted from the team's SOP notes sheet) ----------
+    const OPPORTUNITIES = [
+      {
+        id: 'op-general-match',
+        title: 'Order Not Re-checked Against Backend Status',
+        category: 'General',
+        comment: 'Agent replied to merchant before checking backend match / rejection status.',
+        sop: {
+          title: 'General — Match, Rejection & Urgent Update',
+          steps: [
+            '匹配 (Match): check the order against backend status before replying.',
+            '不匹配 → 要求駁回 (require rejection) and record the rejection reason.',
+            '出码吗 (check if code was issued) — confirm this before treating it as failed.',
+            '通暢區間 / 更新代收代付区间: if time-sensitive, flag 加急 (urgent) so the range updates promptly.'
+          ],
+          source: 'Source: SOP notes, General tab'
+        }
+      },
+      {
+        id: 'op-general-transfer',
+        title: 'Account-to-Account Transfer Missing Template Steps',
+        category: 'General',
+        comment: 'Agent moved funds between accounts (e.g. 从壹壹转移到大宝) without the remark, screenshot, or follow-up Order IDs.',
+        sop: {
+          title: 'General — 转移 (Transfer Between Accounts) Template',
+          steps: [
+            'Payout adjustment: deduct from the source account first, then top up the destination account (先 deduct 再 top up).',
+            'Remark the amount: "从 [source] 转移到 [destination] [amount]" — both sides\' Order IDs must be added afterward.',
+            'Go to Payout, filter by "Complete + CNY", and take a screenshot.',
+            'Send the screenshot to the Merchant and the CS Ops group.',
+            'Return to the order and fill in both sides\' Order ID.'
+          ],
+          source: 'Source: SOP notes, General tab — 转移 template'
+        }
+      },
+      {
+        id: 'op-general-malicious',
+        title: 'Malicious Payment Treated as a Merchant Complaint',
+        category: 'General',
+        comment: 'A PSP-flagged malicious payment was logged the same way as a merchant complaint order.',
+        sop: {
+          title: 'General — Malicious Payment vs. Complaint Order',
+          steps: [
+            '惡意打款 (Malicious payment): this is raised by the PSP, not the merchant — it is a separate, independent flow. Notify the merchant and log in the sheet.',
+            'Complaint order: this is raised by the Merchant (e.g. a slip with no Order ID). Notify the merchant and log in the sheet.',
+            'Do not merge the two — they start from different sources even though both end in "notify + log".'
+          ],
+          source: 'Source: SOP notes, General tab — corrected per team feedback'
+        }
+      },
+      {
+        id: 'op-reply-sla',
+        title: 'TG Reply Exceeded SLA (>2 mins)',
+        category: 'CS Rules',
+        comment: 'First reply to merchant took 4 minutes, no interim message sent.',
+        sop: {
+          title: 'CS Reply SLA',
+          steps: [
+            'Reply within 2 minutes for a standard merchant.',
+            'For a VIP merchant, reply twice within any 10-minute window.',
+            'INR merchants are the exception: 30 minutes is acceptable.',
+            'Never delete any message, unless it names a specific partner.'
+          ],
+          source: 'Source: SOP notes, CS rules'
+        }
+      },
+      {
+        id: 'op-esc-incomplete',
+        title: 'Escalation Ticket Missing Required Fields',
+        category: 'CS Rules',
+        comment: 'Ticket sent to tech team had no Investigation section.',
+        sop: {
+          title: 'Escalation (ESC) Template',
+          steps: [
+            'State which Merchant / PSP / System has the issue.',
+            'Write a short Summary of the issue or change.',
+            'List the Investigation steps already taken.',
+            'State the desired Outcome / status.',
+            'Attach a screenshot.'
+          ],
+          source: 'Source: SOP notes, ESC template'
+        }
+      },
+      {
+        id: 'op-withdraw-rate',
+        title: 'Quoted the Old Fixed RMB Withdraw Rate',
+        category: 'Withdraw',
+        comment: 'Agent quoted the old fixed 6.97 RMB rate to a merchant on a withdraw request.',
+        sop: {
+          title: 'Withdraw — Exchange Rate',
+          steps: [
+            'The fixed 6.97 RMB rate is discontinued — do not quote it.',
+            'Use the individual PSP\'s own exchange rate for the withdraw instead.',
+            'Rate is effective for 5 minutes — confirm with the merchant within that window.'
+          ],
+          source: 'Source: SOP notes, Withdraw tab — corrected per team feedback'
+        }
+      }
+    ];
+    function renderOpportunities() {
+      const wrap = document.getElementById('opportunities-list');
+      if (!wrap) return;
+      wrap.innerHTML = OPPORTUNITIES.map(op => `
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-semibold text-xs text-slate-900">
+              <i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1.5"></i>${op.title}
+              <span class="ml-2 text-[10px] font-bold uppercase tracking-wide text-indigo-600 bg-indigo-50 border border-indigo-200 rounded px-1.5 py-0.5">${op.category}</span>
+            </span>
+            <button onclick="openSopModalFor('${op.id}')" class="shrink-0 text-xs text-indigo-600 font-bold hover:underline flex items-center">
+              <i class="fa-solid fa-diagram-project mr-1"></i>Contextual SOP Pop-up
+            </button>
+          </div>
+          <p class="text-xs text-slate-600"><strong>QA Comment:</strong> ${op.comment}</p>
+        </div>`).join('');
+    }
+    function openSopModalFor(id) {
+      const op = OPPORTUNITIES.find(o => o.id === id);
+      if (!op) return;
+      document.getElementById('sop-modal-title').innerHTML =
+        `<i class="fa-solid fa-diagram-project text-indigo-600 mr-2"></i>SOP Read-Only Pop-up: ${op.sop.title}`;
+      document.getElementById('sop-modal-steps').innerHTML = op.sop.steps.map(s => `<li>${s}</li>`).join('');
+      document.getElementById('sop-modal-source').textContent = op.sop.source;
+      openModal('sop-modal');
+    }
+    // ---------- Telegram Log Import: Auto Reply-Matching & SLA Flagging ----------
+    // Minimal CSV parser: handles quoted fields, embedded commas/newlines, "" escaping.
+    function parseCsvRows(text) {
+      const rows = [];
+      let row = [], field = '', inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i], next = text[i + 1];
+        if (inQuotes) {
+          if (c === '"' && next === '"') { field += '"'; i++; }
+          else if (c === '"') { inQuotes = false; }
+          else { field += c; }
+        } else {
+          if (c === '"') inQuotes = true;
+          else if (c === ',') { row.push(field); field = ''; }
+          else if (c === '\r') { /* skip */ }
+          else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+          else field += c;
+        }
+      }
+      if (field.length || row.length) { row.push(field); rows.push(row); }
+      return rows.filter(r => r.some(f => f.trim() !== ''));
+    }
+    function isAgentSender(name) {
+      return /(^|_)CS[0-9A-Z]*$/i.test((name || '').trim()) || /_CS\d/i.test(name || '');
+    }
+    function slaThresholdMinutes(groupName) {
+      const g = (groupName || '').toUpperCase();
+      if (g.includes('INR')) return 30;   // INR exception per CS rules
+      if (g.includes('VIP')) return 10;   // VIP approximation — real rule is 2 replies within 10 min
+      return 2;                            // standard
+    }
+    function parseTgLog() {
+      const raw = document.getElementById('tg-log-input').value.trim();
+      const statusEl = document.getElementById('tg-log-status');
+      const resultsEl = document.getElementById('tg-log-results');
+      if (!raw) { statusEl.textContent = 'Paste some rows first.'; return; }
+      let rows = parseCsvRows(raw);
+      // Drop header row if it looks like one.
+      if (rows.length && /date/i.test(rows[0][0] || '')) rows = rows.slice(1);
+
+      const messages = rows.map(r => {
+        const [dateStr, groupId, groupName, senderId, senderName, msgId, content, replyRaw] = r;
+        const t = new Date(dateStr);
+        const replyMatch = /回應訊息ID[：:]\s*(\d+)/.exec(replyRaw || '');
+        return {
+          time: t, hasTime: !isNaN(t) && /\d{1,2}:\d{2}/.test(dateStr || ''),
+          groupId, groupName, senderId, senderName: (senderName || '').trim(),
+          msgId, content: (content || '').trim(), replyToId: replyMatch ? replyMatch[1] : null
+        };
+      }).filter(m => m.groupId);
+
+      if (messages.length === 0) {
+        statusEl.textContent = 'Could not parse any rows — check the column order matches the format above.';
+        resultsEl.innerHTML = '';
+        return;
+      }
+      const noTimeCount = messages.filter(m => !m.hasTime).length;
+
+      // Group by chat, sort by time, pair each unanswered external message with the next agent message.
+      const byGroup = {};
+      messages.forEach(m => { (byGroup[m.groupId] = byGroup[m.groupId] || []).push(m); });
+      const pairs = [];
+      Object.values(byGroup).forEach(list => {
+        list.sort((a, b) => a.time - b.time);
+        let pendingExternal = null;
+        list.forEach(m => {
+          const agent = isAgentSender(m.senderName);
+          if (agent) {
+            if (pendingExternal) {
+              const gapMin = m.hasTime && pendingExternal.hasTime ? (m.time - pendingExternal.time) / 60000 : null;
+              pairs.push({ groupName: m.groupName, external: pendingExternal, agentMsg: m, gapMin });
+              pendingExternal = null;
+            }
+          } else {
+            if (!pendingExternal) pendingExternal = m;
+          }
+        });
+        if (pendingExternal) pairs.push({ groupName: pendingExternal.groupName, external: pendingExternal, agentMsg: null, gapMin: null });
+      });
+
+      pairs.sort((a, b) => (b.gapMin ?? 999) - (a.gapMin ?? 999));
+      statusEl.textContent = `${messages.length} messages · ${pairs.length} conversation threads` +
+        (noTimeCount ? ` · ${noTimeCount} rows had no time component (SLA can't be checked for those)` : '');
+
+      resultsEl.innerHTML = pairs.map(p => {
+        const threshold = slaThresholdMinutes(p.groupName);
+        let statusHtml, gapLabel;
+        if (p.gapMin == null && p.agentMsg == null) {
+          statusHtml = `<span class="text-slate-500">Unresolved — no agent reply found</span>`;
+          gapLabel = '—';
+        } else if (p.gapMin == null) {
+          statusHtml = `<span class="text-slate-400">No time data</span>`;
+          gapLabel = '—';
+        } else {
+          const breach = p.gapMin > threshold;
+          statusHtml = breach
+            ? `<span class="text-red-600 font-bold">Breach (limit ${threshold}m)</span>`
+            : `<span class="text-emerald-600 font-bold">OK (limit ${threshold}m)</span>`;
+          gapLabel = `${p.gapMin.toFixed(1)}m`;
+        }
+        const slaPass = p.gapMin != null ? p.gapMin <= threshold : null;
+        return `
+        <div class="border border-slate-200 rounded-lg p-3">
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <span class="text-xs font-bold text-slate-700 truncate">${p.groupName || 'Unknown group'}</span>
+            <span class="text-xs">${statusHtml} · <span class="text-slate-400">${gapLabel}</span></span>
+          </div>
+          <div class="text-xs text-slate-600"><strong>${p.external.senderName}:</strong> ${p.external.content.slice(0, 90)}</div>
+          <div class="text-xs text-slate-600">${p.agentMsg ? `<strong>${p.agentMsg.senderName}:</strong> ${p.agentMsg.content.slice(0, 90)}` : '<span class="text-slate-400">— no reply yet —</span>'}</div>
+          ${slaPass != null ? `<button onclick="applySlaSuggestion('${slaPass ? 'yes' : 'no'}')" class="mt-2 text-[11px] text-indigo-600 font-bold hover:underline">Use "${slaPass ? 'Yes' : 'No'}" for SLA in the scorecard below →</button>` : ''}
+        </div>`;
+      }).join('') || `<div class="text-xs text-slate-400">No conversation threads found.</div>`;
+    }
+    function applySlaSuggestion(value) {
+      const input = document.querySelector(`input[name="dim-sla"][value="${value}"]`);
+      if (input) { input.checked = true; updateOverallScore(); }
+    }
+
+    // ---------- Per-Agent Ticket Sampling (placeholder pool — swap for real backend later) ----------
+    const SAMPLE_AGENTS = ['Emily Chen', 'John Agent', 'Priya Rao', 'Wei Lin', 'Carlos Tan'];
+    const SAMPLE_TOPICS = ['Payout proof delay', 'Escalation ticket', 'Withdraw rate query', 'Payin slip verification', 'General complaint', 'TG reply SLA check', 'Transfer request'];
+    function buildMockTickets() {
+      const tickets = [];
+      let idCounter = 40000;
+      SAMPLE_AGENTS.forEach(agent => {
+        const team = agent === 'Emily Chen' ? 'Team Alpha' : (Math.random() < 0.5 ? 'Team Alpha' : 'Payout Team');
+        const count = 8 + Math.floor(Math.random() * 6);
+        for (let i = 0; i < count; i++) {
+          const d = new Date();
+          d.setDate(d.getDate() - Math.floor(Math.random() * 30));
+          tickets.push({ id: '#' + (idCounter++), agent, team, date: d.toISOString(), topic: SAMPLE_TOPICS[Math.floor(Math.random() * SAMPLE_TOPICS.length)] });
+        }
+      });
+      return tickets;
+    }
+    const MOCK_TICKETS = buildMockTickets();
+    let currentAuditTicket = { agent: 'Emily Chen', team: 'Team Alpha', ticketRef: '#48120', topic: 'Payout proof delay' };
+
+    function populateAgentSelect() {
+      const sel = document.getElementById('sample-agent');
+      if (!sel) return;
+      sel.innerHTML = SAMPLE_AGENTS.map(a => `<option value="${a}">${a}</option>`).join('');
+    }
+    function setDefaultSampleDates() {
+      const end = new Date(), start = new Date();
+      start.setDate(start.getDate() - 14);
+      const fmt = d => d.toISOString().slice(0, 10);
+      const s = document.getElementById('sample-start'), e = document.getElementById('sample-end');
+      if (s && !s.value) s.value = fmt(start);
+      if (e && !e.value) e.value = fmt(end);
+    }
+    function randomSampleTickets() {
+      const agent = document.getElementById('sample-agent').value;
+      const start = new Date(document.getElementById('sample-start').value);
+      const end = new Date(document.getElementById('sample-end').value + 'T23:59:59');
+      const count = Math.max(1, Number(document.getElementById('sample-count').value) || 1);
+      const pool = MOCK_TICKETS.filter(t => t.agent === agent && new Date(t.date) >= start && new Date(t.date) <= end);
+      const picked = pool.slice().sort(() => Math.random() - 0.5).slice(0, count);
+      const wrap = document.getElementById('sample-results');
+      if (picked.length === 0) {
+        wrap.innerHTML = `<div class="text-xs text-slate-400">No tickets found for ${agent} in that range — widen the dates or pick another agent.</div>`;
+        return;
+      }
+      wrap.innerHTML = `<div class="text-[11px] text-slate-400 mb-1">${pool.length} ticket(s) in range · ${picked.length} drawn</div>` +
+        picked.map(t => `
+        <div class="flex items-center justify-between text-xs bg-slate-50 border border-slate-200 rounded p-2.5 gap-2">
+          <span class="text-slate-600"><strong>${t.id}</strong> · ${t.agent} · ${new Date(t.date).toLocaleDateString()} · ${t.topic}</span>
+          <button onclick="selectTicketForAudit('${t.id}')" class="shrink-0 text-indigo-600 font-bold hover:underline">Evaluate this ticket →</button>
+        </div>`).join('');
+    }
+    function selectTicketForAudit(id) {
+      const t = MOCK_TICKETS.find(x => x.id === id);
+      if (!t) return;
+      currentAuditTicket = { agent: t.agent, team: t.team, ticketRef: t.id, topic: t.topic };
+      const titleEl = document.getElementById('scorecard-title');
+      if (titleEl) {
+        titleEl.textContent = `QA Scorecard — ${t.agent}, Ticket ${t.id} (${t.topic})`;
+        titleEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      renderScorecard();
+    }
+
+    // ---------- QA Scorecard (placeholder auto-suggestion rules) ----------
+    // Each function is a stand-in for real logic once Telegram/backend APIs are wired in.
+    // Each aspect is ONE Yes / No / N-A judgment. Yes and N/A both count as full marks; No counts as zero.
+    const SCORE_DIMENSIONS = [
+      {
+        key: 'sla',
+        label: 'SLA',
+        icon: 'fa-solid fa-clock',
+        note: 'From TG reply vs backend action timestamps.',
+        suggest() {
+          // Placeholder: TG reply 14:03:45, backend action 14:13:55, 5-min SLA on the backend step — that's a breach.
+          return 'no';
+        }
+      },
+      {
+        key: 'toolProcess',
+        label: 'Tool Process',
+        icon: 'fa-solid fa-list-check',
+        note: 'Required SOP fields filled (e.g. ESC template, rejection reason).',
+        suggest() {
+          // Placeholder: 3 of 4 required fields present on this sample ticket — not all filled, so No.
+          return 'no';
+        }
+      },
+      {
+        key: 'messageRelevant',
+        label: 'Message Relevant',
+        icon: 'fa-solid fa-comments',
+        note: 'Did the reply actually address what was asked?',
+        suggest() {
+          // Placeholder: no reliable auto-signal yet — default to N/A rather than guessing.
+          return 'na';
+        }
+      },
+      {
+        key: 'convo',
+        label: 'Convo',
+        icon: 'fa-solid fa-face-smile',
+        note: 'Tone & professionalism — no reliable auto-signal yet.',
+        suggest() {
+          // Placeholder: no reliable auto-signal yet — default to N/A rather than guessing.
+          return 'na';
+        }
+      }
+    ];
+    function scoreForAnswer(v) { return v === 'no' ? 0 : 100; } // yes -> 100, na -> 100, no -> 0
+    function renderScorecard() {
+      const wrap = document.getElementById('scorecard-dims');
+      if (!wrap) return;
+      wrap.innerHTML = SCORE_DIMENSIONS.map(d => {
+        const suggested = d.suggest();
+        const options = [['yes', 'Yes'], ['no', 'No'], ['na', 'N/A']];
+        return `
+        <div class="border border-slate-200 rounded-lg p-3">
+          <div class="flex items-center gap-1.5 text-xs font-bold text-slate-700 mb-1">
+            <i class="${d.icon} text-indigo-500"></i>${d.label}
+          </div>
+          <p class="text-[10px] text-slate-400 mb-2 leading-snug">${d.note}</p>
+          <div class="flex gap-1" id="dim-${d.key}">
+            ${options.map(([val, lbl]) => `
+              <label class="flex-1 text-center text-xs font-bold rounded px-1.5 py-1.5 border cursor-pointer
+                ${val === suggested ? 'border-indigo-400' : 'border-slate-200'}">
+                <input type="radio" name="dim-${d.key}" value="${val}" ${val === suggested ? 'checked' : ''}
+                  onchange="updateOverallScore()" class="hidden">
+                <span class="dim-opt-label">${lbl}</span>
+              </label>`).join('')}
+          </div>
+          <div class="text-[10px] text-slate-400 mt-1">Suggested: ${options.find(o => o[0] === suggested)[1]}</div>
+        </div>`;
+      }).join('');
+      styleScorecardOptions();
+      updateOverallScore();
+    }
+    function styleScorecardOptions() {
+      // Colour the selected Yes/No/N-A pill per dimension (Tailwind's CDN build can't do this via dynamic classes reliably).
+      SCORE_DIMENSIONS.forEach(d => {
+        const group = document.getElementById(`dim-${d.key}`);
+        if (!group) return;
+        group.querySelectorAll('label').forEach(label => {
+          const input = label.querySelector('input');
+          const selected = input.checked;
+          const tone = input.value === 'yes' ? '#ecfdf5;color:#047857;border-color:#a7f3d0'
+            : input.value === 'no' ? '#fef2f2;color:#b91c1c;border-color:#fecaca'
+              : '#f8fafc;color:#64748b;border-color:#e2e8f0';
+          label.style.background = selected ? tone.split(';')[0] : '#fff';
+          label.style.color = selected ? tone.split(';')[1].replace('color:', '') : '#94a3b8';
+        });
+      });
+    }
+    function updateOverallScore() {
+      styleScorecardOptions();
+      const vals = SCORE_DIMENSIONS.map(d => {
+        const checked = document.querySelector(`input[name="dim-${d.key}"]:checked`);
+        return scoreForAnswer(checked ? checked.value : 'na');
+      });
+      const overall = Math.round(vals.reduce((a, b) => a + b, 0) / SCORE_DIMENSIONS.length);
+      const el = document.getElementById('scorecard-overall');
+      if (el) el.textContent = overall;
+      return overall;
+    }
+    async function submitEvaluation() {
+      const overall = updateOverallScore();
+      const record = { id: uid(), agent: currentAuditTicket.agent, team: currentAuditTicket.team, ticket: currentAuditTicket.ticketRef, overall, evaluator: DEMO_USERS[currentRole].name, createdAt: new Date().toISOString() };
+      SCORE_DIMENSIONS.forEach(d => {
+        const checked = document.querySelector(`input[name="dim-${d.key}"]:checked`);
+        record[d.key] = checked ? checked.value : 'na';
+      });
+      state.evaluations = state.evaluations || [];
+      state.evaluations.push(record);
+      await saveKey('cs-qa:evaluations', true, state.evaluations);
+      // Sync into the leaderboard, same as PRD 2.2's "QA override updates scores" behaviour.
+      state.scores.push({ agent: record.agent, team: record.team, score: overall, createdAt: record.createdAt });
+      await saveKey('cs-qa:scores', true, state.scores);
+      renderEvaluations();
+      renderLeaderboard();
+    }
+    function renderEvaluations() {
+      const wrap = document.getElementById('evaluations-list');
+      if (!wrap) return;
+      const list = state.evaluations || [];
+      if (list.length === 0) {
+        wrap.innerHTML = `<div class="text-xs text-slate-400">No evaluations submitted yet.</div>`;
+        return;
+      }
+      const badge = v => {
+        const cls = v === 'yes' ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+          : v === 'no' ? 'bg-red-50 text-red-700 border-red-200'
+            : 'bg-slate-100 text-slate-500 border-slate-200';
+        return `<span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border ${cls}">${v}</span>`;
+      };
+      wrap.innerHTML = list.slice().reverse().map(e => `
+        <div class="flex items-center justify-between text-xs bg-slate-50 border border-slate-200 rounded p-2.5 gap-3">
+          <div>
+            <div class="text-slate-600">${e.agent} · ${e.ticket} · by ${e.evaluator} · ${fmtDate(e.createdAt)}</div>
+            <div class="flex gap-1.5 mt-1">
+              ${SCORE_DIMENSIONS.map(d => `<span title="${d.label}">${d.label.split(' ')[0]}: ${badge(e[d.key] || 'na')}</span>`).join('')}
+            </div>
+          </div>
+          <span class="font-bold text-indigo-600 shrink-0">${e.overall}</span>
+        </div>`).join('');
+    }
+
+    let currentRole = 'TL';
+    let state = { announcements: [], reads: {}, qaweek: [], scores: [], disputes: [], evaluations: [] };
+
+    // ---------- Storage helpers ----------
+    async function loadKey(key, shared, fallback) {
+      try {
+        const res = await window.storage.get(key, shared);
+        if (res && res.value != null) return JSON.parse(res.value);
+        return fallback;
+      } catch { return fallback; }
+    }
+    async function saveKey(key, shared, value) {
+      try { await window.storage.set(key, JSON.stringify(value), shared); }
+      catch (e) { console.error('storage save failed', key, e); }
+    }
+    async function loadAll() {
+      state.announcements = await loadKey('cs-qa:announcements', true, []);
+      state.reads = await loadKey('cs-qa:reads', true, {});
+      state.qaweek = await loadKey('cs-qa:qaweek', true, []);
+      state.scores = await loadKey('cs-qa:scores', true, []);
+      state.disputes = await loadKey('cs-qa:disputes', true, []);
+      state.evaluations = await loadKey('cs-qa:evaluations', true, []);
+      renderAll();
+    }
+
+    function uid() { return Math.random().toString(36).slice(2, 10); }
+    function fmtDate(iso) {
+      const d = new Date(iso);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' +
+        d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    }
+    const scrolledIds = new Set();
+
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    // ---------- Tabs & role switching ----------
+    function switchTab(tabId) {
+      document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+      document.getElementById(`sec-${tabId}`).classList.remove('hidden');
+      document.querySelectorAll('.sb-btn').forEach(btn => {
+        btn.classList.remove('bg-indigo-600', 'text-white', 'font-semibold');
+        btn.classList.add('text-slate-400');
+      });
+      const activeBtn = document.getElementById(`sb-${tabId}`);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-indigo-600', 'text-white', 'font-semibold');
+        activeBtn.classList.remove('text-slate-400');
+      }
+      const titles = {
+        'team-hub': 'Team Hub & Operations Center', 'announcements': 'Announcements Archive', 'agent-portal': 'CS Agent Portal',
+        'qa-evaluation': 'QA Evaluation', 'sop-engine': 'Global SOP Engine', 'it-logs': 'IT Data Health & Sync Logs'
+      };
+      document.getElementById('page-title').textContent = titles[tabId];
+    }
+
+    function switchUserRole(role) {
+      currentRole = role;
+      const u = DEMO_USERS[role];
+      document.getElementById('user-avatar').textContent = u.avatar;
+      document.getElementById('user-name').textContent = u.name;
+      document.getElementById('user-role-badge').textContent = u.badge;
+
+      document.getElementById('sb-sop-engine').classList.toggle('hidden', role === 'AGENT');
+      document.getElementById('btn-new-announcement').classList.toggle('hidden', !(role === 'MANAGER' || role === 'TL' || role === 'QA'));
+      document.getElementById('btn-new-highlight').classList.toggle('hidden', !(role === 'MANAGER' || role === 'QA'));
+      document.getElementById('btn-new-score').classList.toggle('hidden', !(role === 'MANAGER' || role === 'QA' || role === 'TL'));
+      document.getElementById('dispute-btn-wrap').classList.toggle('hidden', role !== 'TL');
+      document.getElementById('btn-submit-eval').classList.toggle('hidden', !(role === 'QA' || role === 'MANAGER'));
+
+      if (role === 'AGENT') switchTab('agent-portal');
+      renderAll();
+    }
+
+    // ---------- Render ----------
+    function renderAll() {
+      renderAnnouncements();
+      renderAnnouncementsArchive();
+      renderQaWeekBanner();
+      renderLeaderboard();
+      renderDisputeStatus();
+      renderOpportunities();
+      renderScorecard();
+      renderEvaluations();
+    }
+
+    function renderAnnouncements() {
+      const wrap = document.getElementById('announcements-list');
+      if (state.announcements.length === 0) {
+        wrap.innerHTML = `<div class="text-xs text-slate-400 border border-dashed border-slate-300 rounded-lg p-6 text-center">No announcements yet — <button onclick="switchTab('announcements')" class="text-indigo-600 font-bold hover:underline">view all previous announcements</button></div>`;
+        return;
+      }
+      const me = DEMO_USERS[currentRole].name;
+      wrap.innerHTML = state.announcements.slice().reverse().map(a => {
+        const readMap = state.reads[a.id] || {};
+        const readByMe = !!readMap[me];
+        const scrolled = scrolledIds.has(a.id) || readByMe;
+        const readCount = Object.keys(readMap).length;
+        const tracker = KNOWN_TEAM_NAMES.map(n => {
+          const r = !!readMap[n];
+          return `<span class="inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded ${r ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}">
+            <i class="fa-solid ${r ? 'fa-circle-check' : 'fa-circle'} text-[9px]"></i>${n}</span>`;
+        }).join(' ');
+        return `
+        <div class="bg-white border-2 ${readByMe ? 'border-slate-200' : 'border-indigo-500'} rounded-xl shadow-md overflow-hidden">
+          <div class="bg-indigo-600 px-4 py-3 text-white flex items-center justify-between">
+            <div class="flex items-center space-x-2 font-semibold text-sm">
+              <i class="fa-solid fa-bullhorn text-amber-300"></i><span>${a.title}</span>
+            </div>
+            <span class="bg-indigo-700 text-indigo-100 text-xs px-2.5 py-1 rounded-full font-medium">${readByMe ? 'Read' : 'Action Required'}</span>
+          </div>
+          <div class="p-6">
+            <div onscroll="onAnnScroll(event,'${a.id}')" class="h-28 overflow-y-auto custom-scrollbar p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700 space-y-2 mb-4">
+              <p class="whitespace-pre-wrap">${a.body}</p>
+              <p class="text-slate-400 italic pt-6">— end of announcement —</p>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+              <label class="flex items-center space-x-2 text-xs ${scrolled ? 'text-slate-900 cursor-pointer' : 'text-slate-400 cursor-not-allowed'}">
+                <input type="checkbox" ${readByMe ? 'checked disabled' : (scrolled ? '' : 'disabled')} id="chk-${a.id}" class="w-4 h-4 text-indigo-600 rounded">
+                <span>I have completely read and understood this.</span>
+              </label>
+              <button onclick="acknowledge('${a.id}')" ${readByMe ? 'disabled' : (scrolled ? '' : 'disabled')}
+                class="text-xs font-medium px-4 py-1.5 rounded-lg ${readByMe ? 'bg-slate-100 text-slate-400' : (scrolled ? 'bg-indigo-600 text-white' : 'bg-slate-300 text-slate-500 cursor-not-allowed')}">
+                ${readByMe ? 'Acknowledged' : 'Acknowledge Notice'}
+              </button>
+            </div>
+            <div class="mt-3 pt-3 border-t border-slate-100">
+              <div class="text-[11px] text-slate-400 mb-1.5">${readCount} of ${KNOWN_TEAM_NAMES.length} acknowledged</div>
+              <div class="flex flex-wrap gap-1">${tracker}</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function onAnnScroll(evt, id) {
+      const el = evt.target;
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 5) {
+        scrolledIds.add(id);
+        renderAnnouncements();
+        renderAnnouncementsArchive();
+      }
+    }
+    async function acknowledge(id) {
+      const me = DEMO_USERS[currentRole].name;
+      state.reads[id] = { ...(state.reads[id] || {}), [me]: new Date().toISOString() };
+      await saveKey('cs-qa:reads', true, state.reads);
+      renderAnnouncements();
+      renderAnnouncementsArchive();
+    }
+    async function submitAnnouncement() {
+      const title = document.getElementById('ann-title').value.trim();
+      const body = document.getElementById('ann-body').value.trim();
+      const importance = document.getElementById('ann-importance').value;
+      if (!title || !body) return;
+      state.announcements.push({ id: uid(), title, body, importance, clicks: 0, author: DEMO_USERS[currentRole].name, createdAt: new Date().toISOString() });
+      await saveKey('cs-qa:announcements', true, state.announcements);
+      document.getElementById('ann-title').value = ''; document.getElementById('ann-body').value = '';
+      closeModal('announcement-modal'); renderAnnouncements(); renderAnnouncementsArchive();
+    }
+
+    // ---------- Announcements Archive (memo-style: searchable, sortable by importance or clicks) ----------
+    const expandedAnnIds = new Set();
+    function importanceRank(imp) { return imp === 'high' ? 3 : imp === 'low' ? 1 : 2; }
+    function importanceBadge(imp) {
+      const map = {
+        high: ['High', 'bg-red-50 text-red-700 border-red-200'],
+        low: ['Low', 'bg-slate-100 text-slate-500 border-slate-200']
+      };
+      const [label, cls] = map[imp] || ['Normal', 'bg-indigo-50 text-indigo-700 border-indigo-200'];
+      return `<span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border ${cls} shrink-0">${label}</span>`;
+    }
+    function renderAnnouncementsArchive() {
+      const wrap = document.getElementById('announcements-archive-list');
+      if (!wrap) return;
+      const q = (document.getElementById('ann-search')?.value || '').toLowerCase().trim();
+      const sortMode = document.getElementById('ann-sort')?.value || 'importance';
+      const me = DEMO_USERS[currentRole].name;
+      let list = state.announcements.filter(a =>
+        !q || a.title.toLowerCase().includes(q) || (a.body || '').toLowerCase().includes(q));
+      list = list.slice();
+      if (sortMode === 'clicks') {
+        list.sort((a, b) => (b.clicks || 0) - (a.clicks || 0));
+      } else {
+        list.sort((a, b) => importanceRank(b.importance) - importanceRank(a.importance) || new Date(b.createdAt) - new Date(a.createdAt));
+      }
+      if (list.length === 0) {
+        wrap.innerHTML = `<div class="text-xs text-slate-400 py-6 text-center">No announcements match.</div>`;
+        return;
+      }
+      wrap.innerHTML = list.map(a => {
+        const readMap = state.reads[a.id] || {};
+        const readByMe = !!readMap[me];
+        const expanded = expandedAnnIds.has(a.id);
+        const scrolled = scrolledIds.has(a.id) || readByMe;
+        return `
+        <div class="py-3">
+          <button onclick="toggleAnnouncementExpand('${a.id}')" class="w-full flex items-center justify-between text-left gap-3">
+            <div class="flex items-center gap-2 min-w-0">
+              <i class="fa-solid fa-chevron-${expanded ? 'down' : 'right'} text-slate-400 text-[10px]"></i>
+              ${importanceBadge(a.importance)}
+              <span class="text-xs font-semibold text-slate-800 truncate">${a.title}</span>
+              ${readByMe ? '' : '<span class="text-[10px] font-bold text-amber-600 shrink-0">• unread</span>'}
+            </div>
+            <div class="flex items-center gap-3 shrink-0 text-[11px] text-slate-400">
+              <span><i class="fa-solid fa-eye mr-1"></i>${a.clicks || 0}</span>
+              <span>${fmtDate(a.createdAt)}</span>
+            </div>
+          </button>
+          ${expanded ? `
+          <div class="mt-3 pl-2 border-l-2 border-indigo-200">
+            <div onscroll="onAnnScroll(event,'${a.id}')" class="h-28 overflow-y-auto custom-scrollbar p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700 space-y-2 mb-3">
+              <p class="whitespace-pre-wrap">${a.body}</p>
+              <p class="text-slate-400 italic pt-6">— end of announcement —</p>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+              <label class="flex items-center space-x-2 text-xs ${scrolled ? 'text-slate-900 cursor-pointer' : 'text-slate-400 cursor-not-allowed'}">
+                <input type="checkbox" ${readByMe ? 'checked disabled' : (scrolled ? '' : 'disabled')} class="w-4 h-4 text-indigo-600 rounded">
+                <span>I have completely read and understood this.</span>
+              </label>
+              <button onclick="acknowledge('${a.id}')" ${readByMe ? 'disabled' : (scrolled ? '' : 'disabled')}
+                class="text-xs font-medium px-4 py-1.5 rounded-lg ${readByMe ? 'bg-slate-100 text-slate-400' : (scrolled ? 'bg-indigo-600 text-white' : 'bg-slate-300 text-slate-500 cursor-not-allowed')}">
+                ${readByMe ? 'Acknowledged' : 'Acknowledge Notice'}
+              </button>
+            </div>
+            <div class="text-[11px] text-slate-400 mt-2">By ${a.author} · ${fmtDate(a.createdAt)}</div>
+          </div>` : ''}
+        </div>`;
+      }).join('');
+    }
+    async function toggleAnnouncementExpand(id) {
+      if (expandedAnnIds.has(id)) {
+        expandedAnnIds.delete(id);
+      } else {
+        expandedAnnIds.add(id);
+        const a = state.announcements.find(x => x.id === id);
+        if (a) {
+          a.clicks = (a.clicks || 0) + 1;
+          await saveKey('cs-qa:announcements', true, state.announcements);
+        }
+      }
+      renderAnnouncementsArchive();
+    }
+
+    function renderQaWeekBanner() {
+      const el = document.getElementById('qaweek-banner');
+      const latest = state.qaweek[state.qaweek.length - 1];
+      if (!latest) {
+        el.innerHTML = `<div class="text-xs text-slate-400">No highlight published yet.</div>`;
+        return;
+      }
+      el.innerHTML = `
+        <div class="flex items-center justify-between mb-4">
+          <span class="bg-amber-400 text-slate-900 text-xs font-bold px-3 py-1 rounded-full uppercase">⭐ QA of the Week</span>
+          <span class="text-xs text-slate-400">${latest.scope === 'team' ? 'Team Highlight' : 'Case Highlight'}</span>
+        </div>
+        <h3 class="font-bold text-base text-amber-300 mb-1">${latest.title}</h3>
+        <p class="text-xs text-indigo-200 mb-4">${latest.subject}</p>
+        <div class="bg-slate-800/80 p-3 rounded-lg text-xs space-y-2 border border-slate-700">
+          <span class="text-amber-300 font-bold block"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Takeaway</span>
+          <p class="text-slate-300">${latest.summary}</p>
+        </div>`;
+    }
+    async function submitQaWeek() {
+      const scope = document.getElementById('qw-scope').value;
+      const subject = document.getElementById('qw-subject').value.trim();
+      const title = document.getElementById('qw-title').value.trim();
+      const summary = document.getElementById('qw-summary').value.trim();
+      if (!title || !summary) return;
+      state.qaweek.push({ scope, subject, title, summary, createdAt: new Date().toISOString() });
+      await saveKey('cs-qa:qaweek', true, state.qaweek);
+      closeModal('qaweek-modal'); renderQaWeekBanner();
+    }
+
+    function renderLeaderboard() {
+      const body = document.getElementById('leaderboard-body');
+      const byAgent = {};
+      state.scores.forEach(s => {
+        byAgent[s.agent] = byAgent[s.agent] || { agent: s.agent, team: s.team, total: 0, count: 0 };
+        byAgent[s.agent].total += s.score; byAgent[s.agent].count += 1;
+      });
+      const rows = Object.values(byAgent).map(r => ({ ...r, avg: Math.round((r.total / r.count) * 10) / 10 }))
+        .sort((a, b) => b.avg - a.avg);
+      if (rows.length === 0) {
+        body.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400">No scores recorded yet.</td></tr>`;
+        return;
+      }
+      const medal = i => i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
+      body.innerHTML = rows.map((r, i) => `
+        <tr>
+          <td class="py-2.5 px-3 font-bold text-slate-500">${medal(i)} #${i + 1}</td>
+          <td class="py-2.5 px-3 font-semibold">${r.agent}</td>
+          <td class="py-2.5 px-3 text-slate-500">${r.team}</td>
+          <td class="py-2.5 px-3 font-bold ${r.avg >= 90 ? 'text-emerald-600' : r.avg >= 75 ? 'text-indigo-600' : 'text-amber-600'}">${r.avg}</td>
+          <td class="py-2.5 px-3 text-slate-500">${r.count}</td>
+        </tr>`).join('');
+    }
+    async function submitScore() {
+      const agent = document.getElementById('sc-agent').value.trim();
+      const team = document.getElementById('sc-team').value.trim();
+      const score = Number(document.getElementById('sc-score').value);
+      if (!agent || isNaN(score)) return;
+      state.scores.push({ agent, team, score, createdAt: new Date().toISOString() });
+      await saveKey('cs-qa:scores', true, state.scores);
+      closeModal('score-modal'); renderLeaderboard();
+    }
+
+    function renderDisputeStatus() {
+      const wrap = document.getElementById('dispute-status-list');
+      const mine = state.disputes.filter(d => d.team === 'Team Alpha');
+      if (mine.length === 0) { wrap.innerHTML = ''; return; }
+      wrap.innerHTML = `<div class="text-[11px] font-semibold text-slate-500 uppercase pt-2">Team Disputes</div>` +
+        mine.slice().reverse().map(d => `
+          <div class="text-xs bg-slate-50 border border-slate-200 rounded p-2.5 flex items-start justify-between gap-2">
+            <span class="text-slate-600">${d.reason}</span>
+            <span class="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700">${d.status}</span>
+          </div>`).join('');
+    }
+    async function submitDispute() {
+      const reason = document.getElementById('dispute-reason').value.trim();
+      if (!reason) return;
+      state.disputes.push({ id: uid(), team: 'Team Alpha', reason, status: 'Pending QA Review', raisedBy: DEMO_USERS[currentRole].name, createdAt: new Date().toISOString() });
+      await saveKey('cs-qa:disputes', true, state.disputes);
+      document.getElementById('dispute-reason').value = '';
+      closeModal('dispute-modal'); renderDisputeStatus();
+    }
+
+    populateAgentSelect();
+    setDefaultSampleDates();
+    loadAll();
+  </script>
+</body>
+</html>
