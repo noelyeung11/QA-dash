@@ -268,7 +268,7 @@
           <div class="bg-white rounded-xl border border-slate-200 p-5 mb-4">
             <h4 class="font-bold text-slate-800 text-sm mb-1"><i class="fa-brands fa-telegram text-sky-500 mr-2"></i>Paste a Telegram log export to test the SLA matcher</h4>
             <p class="text-xs text-slate-500 mb-3">Paste rows in the agreed format (Date+Time, Group ID, Group Name, Sender ID, Sender Name, Message ID, Content, Reply-to). The first line can be a header — it's skipped automatically.</p>
-            <textarea id="tg-log-input" rows="6" placeholder="Date,群組或頻道ID,群組或頻道名稱,發訊者ID,發訊者名稱,訊息ID,訊息內容,文件標題或回應訊息ID&#10;2026-09-07 14:03:45,-100123,K9win x HTPAY INR,5471491194,CS15CBV,90897,fund not received yet,&#10;..." class="w-full border border-slate-300 rounded-lg p-3 text-xs font-mono mb-3"></textarea>
+            <textarea id="tg-log-input" rows="6" placeholder="Date,群組或頻道ID,群組或頻道名稱,發訊者ID,發訊者名稱,訊息ID,訊息內容,文件標題或回應訊息ID&#10;2026-09-07 14:03:45,-100123,ClientNine x PAYHUB INR,5471491194,CS05MNO,90897,fund not received yet,&#10;..." class="w-full border border-slate-300 rounded-lg p-3 text-xs font-mono mb-3"></textarea>
             <div class="flex items-center gap-3 mb-4">
               <button onclick="parseTgLog()" class="bg-indigo-600 text-white text-xs font-medium px-4 py-2 rounded-lg"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Match Replies &amp; Check SLA</button>
               <span id="tg-log-status" class="text-xs text-slate-400"></span>
@@ -444,7 +444,7 @@
         id: 'op-general-transfer',
         title: 'Account-to-Account Transfer Missing Template Steps',
         category: 'General',
-        comment: 'Agent moved funds between accounts (e.g. 从壹壹转移到大宝) without the remark, screenshot, or follow-up Order IDs.',
+        comment: 'Agent moved funds between accounts (e.g. 从 Acme 转移到 Globex) without the remark, screenshot, or follow-up Order IDs.',
         sop: {
           title: 'General — 转移 (Transfer Between Accounts) Template',
           steps: [
